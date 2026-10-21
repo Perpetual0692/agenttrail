@@ -9,11 +9,15 @@ import {pathToFileURL} from 'node:url';
 const run=promisify(execFile);
 const archive=process.argv[2]&&path.resolve(process.argv[2]);
 if(!archive)throw new Error('Provide the .tgz produced by npm pack.');
+// Windows cannot spawn npm.cmd without a shell, and a shell would reinterpret
+// the fixture paths. Run npm's own entry point with node instead.
+const npmCli=process.platform==='win32'?path.join(path.dirname(process.execPath),'node_modules','npm','bin','npm-cli.js'):null;
+const npmCommand=npmCli?process.execPath:'npm';
+const npmArgs=args=>npmCli?[npmCli,...args]:args;
 const fixture=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'agenttrail-kitchen-package-')));
 let service,events;
 try{
-  const npm=process.platform==='win32'?'npm.cmd':'npm';
-  await run(npm,['install','--prefix',fixture,'--omit=dev','--ignore-scripts','--offline','--no-audit','--no-fund',archive],{timeout:60000});
+  await run(npmCommand,npmArgs(['install','--prefix',fixture,'--omit=dev','--ignore-scripts','--offline','--no-audit','--no-fund',archive]),{timeout:60000});
   const installed=path.join(fixture,'node_modules/agenttrail-kitchen');
   const pkg=JSON.parse(await fs.readFile(path.join(installed,'package.json'),'utf8'));
   assert.equal(pkg.license,'MIT');
@@ -25,7 +29,7 @@ try{
   await assert.rejects(fs.access(path.join(fixture,'node_modules/three')),{code:'ENOENT'});
   const cli=path.join(installed,pkg.bin['agenttrail-kitchen']);
   assert.match((await run(process.execPath,[cli,'--help'])).stdout,/agenttrail-kitchen/);
-  const launch=args=>run(npm,['exec','--offline','--yes','--','agenttrail-kitchen',...args],{cwd:fixture,timeout:15000});
+  const launch=args=>run(npmCommand,npmArgs(['exec','--offline','--yes','--','agenttrail-kitchen',...args]),{cwd:fixture,timeout:15000});
   assert.match((await launch(['--help'])).stdout,/Agenttrail Kitchen/);
   const first=path.join(fixture,'first repo'),second=path.join(fixture,"repo with spaces ' and $(literal)");
   const stateDir=path.join(fixture,'state'),observerHome=path.join(fixture,'empty-observer-home');
