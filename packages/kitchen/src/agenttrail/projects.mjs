@@ -25,11 +25,12 @@ export function parsePlan(text) {
   return components;
 }
 export function matchesGlob(file,glob) {
+  const f=String(file??'').replace(/\\/g,'/');
   let p='';for(let i=0;i<glob.length;i++){
     if(glob[i]==='*'&&glob[i+1]==='*'){i++;if(glob[i+1]==='/'){i++;p+='(?:.*/)?';}else p+='.*';}
     else if(glob[i]==='*')p+='[^/]*';else if(glob[i]==='?')p+='[^/]';else p+=glob[i].replace(/[.+^${}()|[\]\\]/g,'\\$&');
   }
-  try{return new RegExp('^'+p+'$').test(file);}catch{return false;}
+  try{return new RegExp('^'+p+'$').test(f);}catch{return false;}
 }
 const ignored=f=>/(^|\/)(\.git|node_modules|\.office|\.agenttrail|dist|coverage)(\/|$)|\.DS_Store|\.(swp|tmp)$/.test(f);
 export class Projects {

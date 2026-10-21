@@ -1,7 +1,16 @@
 import path from 'node:path';
 
 export const clean = (v, max = 180) => typeof v === 'string' ? v.replace(/[\x00-\x1f]/g, ' ').slice(0, max) : '';
-export const within = (file, root) => file === root || file.startsWith(root + path.sep);
+// Compare resolved absolute paths so a root written in either separator style
+// still matches on every platform.
+export const within = (file, root) => {
+  if (typeof file !== 'string' || typeof root !== 'string' || !file || !root) return false;
+  const f = path.resolve(file), r = path.resolve(root);
+  return f === r || f.startsWith(r + path.sep);
+};
+// Repo-relative paths are always reported with forward slashes: plan globs,
+// the file tree and the scene all speak one separator.
+export const relPosix = (root, file) => path.relative(root, file).split(path.sep).join('/');
 export function activityFor(tool = '') {
   if(/(?:^|\.)(?:update_plan|TodoWrite|TaskCreate|TaskUpdate|TaskList|TaskGet|todo_write|write_todos)$/i.test(tool))return 'working';
   if(/^(?:functions\.)?exec$/.test(tool))return 'working';
@@ -37,7 +46,7 @@ export class CrewStore {
     const recordWork=()=>{
       const w=event.work;if(!w||!['coordinate','research','build','simulation','review','publish','execute'].includes(w.category))return;
       const f=typeof w.file==='string'?path.resolve(event.cwd,w.file):null;
-      const file=f&&within(f,project)?path.relative(project,f):null,label=w.label==='Read a file'&&file?'Read '+path.basename(file):w.label;
+      const file=f&&within(f,project)?relPosix(project,f):null,label=w.label==='Read a file'&&file?'Read '+path.basename(file):w.label;
       s.workContext={category:w.category,label:clean(label,120),file,at,completed:!!w.completed,toolId:event.toolId||null};
       return true;
     };
@@ -69,7 +78,7 @@ export class CrewStore {
       }
     }
     let observedFile=null;
-    if(event.file){const f=path.resolve(event.cwd,event.file);if(within(f,project)){observedFile=path.relative(project,f);s.file=observedFile;s.fileAt=at;}}
+    if(event.file){const f=path.resolve(event.cwd,event.file);if(within(f,project)){observedFile=relPosix(project,f);s.file=observedFile;s.fileAt=at;}}
     if (event.kind === 'session-start' || event.kind === 'turn-start') { s.state='working'; s.ended=false;s.workContext=null;s.turnStartedAt=at; }
     else if (event.kind === 'tool-start') {
       s.ended=false; s.tools.set(event.toolId || event.id, {name:clean(event.tool,80),file:observedFile});s.currentFile=observedFile; s.state=activityFor(event.tool); s.tool=clean(event.tool,80);

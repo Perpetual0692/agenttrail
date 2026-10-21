@@ -31,7 +31,7 @@ test('the CLI attaches a planless repo to the existing service and replays real 
  const denied=await fetch(office.url+'/api/attach',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({projects:[b]})});assert.equal(denied.status,403);
 });
 test('CLI arguments accept current/relative repos without shell interpretation and reject missing values',()=>{
- assert.deepEqual(parseArgs(['.','../other'], '/projects/one').roots,['/projects/one','/projects/other']);assert.throws(()=>parseArgs(['--project']),/Provide a value/);assert.throws(()=>parseArgs(['--port','no']),/Choose a port/);
+ assert.deepEqual(parseArgs(['.','../other'], '/projects/one').roots,[path.resolve('/projects/one'),path.resolve('/projects/other')]);assert.throws(()=>parseArgs(['--project']),/Provide a value/);assert.throws(()=>parseArgs(['--port','no']),/Choose a port/);
  assert.equal(new URL(liveUrl('http://127.0.0.1:4780',"/repo/'literal' $(safe)")).searchParams.get('project'),"/repo/'literal' $(safe)");
 });
 test('a Codex call and result in the same millisecond cannot leave a phantom active tool',()=>{

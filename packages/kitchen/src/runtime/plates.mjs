@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { clean,within } from './crew.mjs';
+import { clean,within,relPosix } from './crew.mjs';
 
 const providers=['claude','codex','cursor'];
 const identity=value=>typeof value==='string'&&value.length>0&&value.length<=220&&/^[\w.:-]+$/.test(value);
@@ -11,7 +11,7 @@ export class PlateStore {
     const eventKey=`${project}:${e.provider}:${e.id}`;if(this.seen.has(eventKey))return false;
     const producer=`${e.provider}:${e.sessionId}`,key=JSON.stringify([project,e.artifactId,e.revisionId]);
     const knownProducer=this.crew.sessions.get(producer);if(knownProducer&&knownProducer.project!==project)return false;
-    let file=null;if(e.file){if(typeof e.file!=='string')return false;const absolute=path.resolve(e.cwd,e.file);if(!within(absolute,project))return false;file=path.relative(project,absolute);}
+    let file=null;if(e.file){if(typeof e.file!=='string')return false;const absolute=path.resolve(e.cwd,e.file);if(!within(absolute,project))return false;file=relPosix(project,absolute);}
     const prior=this.artifacts.get(key);if(prior&&prior.producer!==producer)return false;
     if(e.orderId&&(!identity(e.orderId)||this.findOrder(e.orderId)?.project!==project||prior&&prior.orderId!==e.orderId))return false;
     const orderId=prior?.orderId||e.orderId||null;
