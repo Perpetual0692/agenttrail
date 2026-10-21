@@ -213,7 +213,8 @@ function toolDetail(input = {}) {
 function relToRepo(p) {
   if (!p) return null
   const r = path.resolve(String(p))
-  return r === repo ? '' : r.startsWith(repo + path.sep) ? r.slice(repo.length + 1) : null
+  // report repo-relative paths with forward slashes so plan globs match on every platform
+  return r === repo ? '' : r.startsWith(repo + path.sep) ? r.slice(repo.length + 1).split(path.sep).join('/') : null
 }
 function handleHookEvent(ev) {
   const cwd = ev.cwd || ''
@@ -422,8 +423,9 @@ function broadcastTick() {
 
 // ---------- watcher ----------
 let planDebounce = null
+let repoWatcher = null
 try {
-  fs.watch(repo, { recursive: true }, (_ev, filename) => {
+  repoWatcher = fs.watch(repo, { recursive: true }, (_ev, filename) => {
     if (!filename) return
     const f = filename.toString().split(path.sep).join('/')
     if (IGNORE.test(f) || TMP_FILE.test(f)) return
@@ -453,7 +455,7 @@ try {
   // recursive watch is unsupported on some platforms (older linux) — degrade:
   // PLAN.md and top-level changes still tracked, deep activity limited.
   try {
-    fs.watch(repo, (_ev, filename) => {
+    repoWatcher = fs.watch(repo, (_ev, filename) => {
       if (!filename) return
       const f = filename.toString()
       if (path.resolve(repo, f) === planPath) {
@@ -696,7 +698,14 @@ async function bootDedup() {
   for (let p = 5330; p < 5345; p++) probes.push(
     fetch(`http://127.0.0.1:${p}/whoami`, { signal: AbortSignal.timeout(400) }).then(r => r.json()).then(w => w.repoPath === repo ? p : null).catch(() => null))
   const hit = (await Promise.all(probes)).find(Boolean)
-  if (hit) { console.log(`agenttrail is already running for this repo · http://localhost:${hit}`); process.exit(0) }
+  if (hit) {
+    console.log(`agenttrail is already running for this repo · http://localhost:${hit}`)
+    // Another board owns this repo: release the watcher and let the loop drain.
+    // A forced process.exit() here races the in-flight probes and aborts the
+    // process on Windows instead of exiting cleanly.
+    try { repoWatcher?.close() } catch {}
+    return
+  }
   listenWithFallback()
 }
 bootDedup()
