@@ -25,6 +25,10 @@ files: [bin/**]
   by: claude
 - [x] Ignore editor droppings and junk folders {#watch-filter}
   tech: tmp/swap filter + .git, node_modules excludes
+- [x] Hand a repo to the board that already owns it {#watch-duplicate-board}
+  by: opencode
+  from: agent
+  tech: bin/agenttrail.mjs bootDedup closes the repo watcher and lets the loop drain; a forced process.exit() aborted the process on Windows
 
 ## Draw the live map {#map}
 tech: svg flow diagram + task capsules
@@ -130,6 +134,10 @@ files: [bin/**, public/**]
 - [x] Explain missing run cards in-product {#runs-explain}
   by: claude
   tech: hooksInstalled flag; hints for no-hooks and pre-hook sessions
+- [x] Match hook file paths to plan globs on Windows {#runs-hook-paths}
+  by: opencode
+  from: agent
+  tech: relToRepo returns forward-slash repo-relative paths in bin/agenttrail.mjs so files: globs match on any platform
 
 - [x] Group live sessions into cycles in the runs dock {#runs-cycle-groups}
   tech: temporal burst grouping in renderRuns, public/index.html
@@ -193,6 +201,14 @@ links: [plan-reader, runs, map]
   by: codex
   from: agent
   tech: downloaded the exact public alpha.2 archive without GitHub credentials, matched its checksum, launched with a fresh npm cache, and observed this real working repo in the browser. All 71 tests pass. Expanded the package check to verify fresh logs over SSE, one session contributing through multiple chefs, native dish completion, and file observation; the public archive passes it.
+- [x] Keep observed file paths portable on Windows {#kitchen-path-portability}
+  by: opencode
+  from: agent
+  tech: within() resolves both sides; repo-relative paths use forward slashes in crew.mjs and plates.mjs; matchesGlob normalizes separators in projects.mjs. All 71 Kitchen tests pass on Windows.
+- [x] Verify the packed kitchen on Windows {#kitchen-package-check-windows}
+  by: opencode
+  from: agent
+  tech: check-package.mjs runs npm through its JS entry point so Windows needs no shell; the packed archive passes the full clean-install check on Windows
 
 ## Ship to GitHub and npm {#ship}
 needs: [map, explorer]
@@ -273,6 +289,7 @@ files: [README.md, docs/**, package.json, CONTRIBUTING.md, examples/**, .github/
   tech: README definition, sentence-case headings, npm metadata, GitHub description and topics
 
 ## decisions
+- 2026-10-21: Treat repo-relative paths as one convention on every platform: forward slashes everywhere, because plan globs, the file tree and the scene all speak POSIX paths. Resolve both sides of a containment check instead of comparing raw strings, so a root written with either separator still matches. The Windows validation gap in the readme is now covered by a green test run on Windows.
 - 2026-09-09: Review the public repository for concrete reliability and setup issues, recording reproducible findings separately from planned features. Describe Agenttrail as the local observability project with two views: Agenttrail Map for project structure and activity, and Agenttrail Kitchen for native tasks and role contributions. Document their current independent services and differing provider support rather than implying a unified event backend or agent orchestration.
 - 2026-09-08: Publish Kitchen to npm now that the owner has restored registry login. Use alpha.3 for the refreshed package README instead of changing the existing alpha.2 archive; keep the experimental version explicit and use the latest tag so npx agenttrail-kitchen . works. Verify the exact public package from a fresh consumer environment, then publish matching GitHub release assets and setup instructions. The owner chose browser setup first; no editor extension is being added.
 - 2026-09-08: Audit the downloadable public Kitchen release from an isolated consumer install, verify real repo observation and adapter behavior, fix launch gaps, and refresh the root README with Kitchen screenshots and exact install/support instructions. No editor extension currently exists; clarify whether the owner wants one built or wants the working browser setup documented. Keep unknown integration status explicit.

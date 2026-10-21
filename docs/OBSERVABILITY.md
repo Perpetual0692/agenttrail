@@ -45,7 +45,7 @@ Provider logs and hooks add session identity, tool activity, lifecycle events an
 | Cursor native activity | No direct adapter; file/plan observation remains available | Optional hooks; native live validation pending |
 | Confirmed artifact transfer | No receipt model; trails may suggest a handoff from timing | Explicit artifact revision and receipt metadata |
 
-Local Codex and Claude collaboration has been exercised. The automated Kitchen checks run on Linux and macOS; Windows and native Cursor validation remain pending. Cloud sessions need accessible local logs or an explicit integration. [Kitchen discovery and connection limits](kitchen/CONNECTING.md)
+Local Codex and Claude collaboration has been exercised. The automated Kitchen checks run in CI on Linux and macOS and were verified locally on Windows; native Cursor validation remains pending. Cloud sessions need accessible local logs or an explicit integration. [Kitchen discovery and connection limits](kitchen/CONNECTING.md)
 
 ## What the kitchen means
 

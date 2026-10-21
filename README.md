@@ -85,7 +85,7 @@ One session can move between several chefs as its work changes. Roles adapt to t
 
 For VS Code or Cursor, keep the browser beside your editor. The current integration is a **local companion**, not a Marketplace extension. Hook setup is explicit and reversible; restart an agent conversation if it does not load newly installed hooks.
 
-Local observation has been exercised on macOS; automated package and adapter checks run on Linux. Windows and native Cursor validation remain pending. Cloud/remote sessions with no logs on the Kitchen host are not automatically discovered. [Details and limits](docs/kitchen/CONNECTING.md)
+Local observation has been exercised on macOS and Windows; automated package and adapter checks run in CI on Linux and macOS and were also verified locally on Windows. Native Cursor validation remains pending. Cloud/remote sessions with no logs on the Kitchen host are not automatically discovered. [Details and limits](docs/kitchen/CONNECTING.md)
 
 ## Run the project map
 
@@ -177,7 +177,7 @@ The Map is a dependency-free Node daemon and a static page. Kitchen is a separat
 
 **What changes in my repo?** Opening Kitchen does not change it. Optional hook installation edits only the reviewed provider settings. Optional `.office/kitchen.json` defines your workflow. Map `init` is a separate setup operation that creates the plan and agent conventions.
 
-**What is still experimental?** Local provider log formats can change. Cursor's native live behavior and Windows remain unverified. Shared artifact receipts need explicit integration, and order history is reconstructed from available observations after restarting. No editor extension has been released yet.
+**What is still experimental?** Local provider log formats can change. Cursor's native live behavior remains unverified. Shared artifact receipts need explicit integration, and order history is reconstructed from available observations after restarting. No editor extension has been released yet.
 
 ## Contribute and license
 

@@ -37,8 +37,9 @@ The existing map daemon, interface and package metadata are unchanged. The root 
 - The expanded installed-package check appends synthetic native logs after attachment and verifies new events over SSE, one actual session moving between role chefs on one shared dish, native completion reaching the deliverable table, and file changes appearing independently. This check passes against the published alpha.2 archive, not only source imports.
 - The public install's browser was checked in both Live and Example: the 3D scene renders, source labels remain explicit, Researcher → Writer contribution is preserved, and a completed dish reaches the table. No browser errors were reported.
 - The 71 tests and clean-package check also pass in CI on Linux with Node 20, 22 and 24 and macOS with Node 22. See the release's associated commit checks for their results.
+- The same 71 tests and the clean-package check pass locally on Windows with Node 24, after repo-relative paths were made separator-independent and the package check was moved off `npm.cmd`.
 
-Earlier native Codex/Claude collaboration was recorded before this import. Native Cursor validation and Windows-specific browser/CLI validation remain pending. No broader support claim is implied by the example mode.
+Earlier native Codex/Claude collaboration was recorded before this import. Native Cursor validation remains pending. No broader support claim is implied by the example mode.
 
 ## Distribution
 
